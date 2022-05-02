@@ -1,0 +1,57 @@
+---
+title: "Portfolio 2"
+author: "Cassandra Richardson"
+date: "4/30/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+```
+
+# **Cassandra Richardson's Portfolio Piece #2 - Data Analysis Report on Chicken Weight and Diet**
+
+
+
+# Step 1: Finding a dataset.
+
+### R has several built-in datasets that we can use to practice R functions with. To view these datasets, simply use the function below: 
+
+```{r finding dataset}
+data()
+```
+
+### After looking at the built-in datasets, I've decided that I want to use "ChickenWeight."
+
+# Step 2: Before we begin any analyses, let's examine what this dataset includes:
+
+```{r exploring chickens}
+View(ChickWeight)
+?ChickWeight
+```
+
+### The "view()" function opens the full dataset file in a new tab, so we can visually examine what the data looks like. The ?ChickenWeight function opens a help file that explains what this built-in dataset covers. 
+
+### The help window tells us that "ChickenWeight" examines the weight versus age of chicken on different diets. This dataset contains 578 rows and 4 columns based on an experiment on the effect of diet on early growth of chicks. 
+
+# Step 3: Let's explore some characteristics about the data:
+
+```{r data characteristics}
+glimpse(ChickWeight)
+head(ChickWeight)
+names(ChickWeight)
+missing <- !complete.cases(ChickWeight)
+ChickWeight[missing]
+```
+
+### - glimpse() shows us an overview of the whole dataset. We see that there are 578 rows and 4 columns, just like the help window told us.
+### - head() gives us the first 6 rows of data
+### - names() tells us all of the variable names: "weight" "Time" "Chick" "Diet"  
+### - missing <- !complete.cases() creates an object/tibble called "missing" with any missing observations across the entire dataset
+### - ChickWeight[missing] shows us that the "missing" tibble has 0 columns. This means that there was no missing data in this dataset, which makes it easier to work with! 
+
+# Step 4: Let's get some basic descriptive statistics about each variable. 
