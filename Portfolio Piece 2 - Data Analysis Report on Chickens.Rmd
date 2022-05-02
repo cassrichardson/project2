@@ -96,9 +96,15 @@ print(chicken_diets)
 
 ### In the code above, I used dplyr's "group_by()" function to say that I want to group the descriptives into each of the four chicken diets. After the data is grouped by diet, I found the mean, sd, min, and max chicken weights for each diet. It looks like diet 1 had the lowest mean weight, whereas diet 3 had the highest mean weight. 
 
-# Step 7: Let's make some plots to better visualize the chickens' weight by diet! 
+# Step 7: Let's make a bar graph to better visualize the chickens' weight by diet! 
 
-```{r bar plots}
-
-
+```{r bar graph}
+ggplot(chicken_data) +
+  aes(x = Diet, y = weight) +
+  geom_bar(stat = "summary", fun = "mean")
 ```
+
+### Now we have a very simple bar graph to represent the mean weight of the chickens at each of the 4 diets! This basic graph uses the ggplot2 package with Diet on the x axis and weight on the y axis. I added (stat = "summary", fun = "mean") to tell R that I don't want the values to be the total count of weights for each diet, but rather the mean weight of each diet. Although this graph gets the job done, let's make this graph look a little better:
+
+# Step 8: Making a better bar graph:
+
