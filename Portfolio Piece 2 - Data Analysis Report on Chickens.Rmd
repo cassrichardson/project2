@@ -55,3 +55,26 @@ ChickWeight[missing]
 ### - ChickWeight[missing] shows us that the "missing" tibble has 0 columns. This means that there was no missing data in this dataset, which makes it easier to work with! 
 
 # Step 4: Let's get some basic descriptive statistics about each variable. 
+
+
+```{r descriptives}
+chicken_data <- ChickWeight
+
+mean(chicken_data$weight)
+```
+  
+  
+# For the sake of practice, let's see what our data would look like in a wider format.
+
+```{r pivot wide}
+chickens_wide <- ChickWeight |> 
+  pivot_wider(id_cols = c(Time, Chick), 
+              names_from = Diet, 
+              values_from = weight)
+```
+
+### In the code above, we did a univariate pivot to make our original dataset wider such that the column for diet (diet 1-4) was split into four columns for each type of diet, and weight was moved to the appropriate diet for each chick and time point. However, this format is harder to interpret and includes many missing variables. Moving forward, we won't use the "chicken_wide" data, and instead we will use the original "ChickWeight."
+
+
+
+# Step x: Let's make some plots! 
