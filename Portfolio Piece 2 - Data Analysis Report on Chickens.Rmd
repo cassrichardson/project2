@@ -54,17 +54,7 @@ ChickWeight[missing]
 ### - missing <- !complete.cases() creates an object/tibble called "missing" with any missing observations across the entire dataset
 ### - ChickWeight[missing] shows us that the "missing" tibble has 0 columns. This means that there was no missing data in this dataset, which makes it easier to work with! 
 
-# Step 4: Let's get some basic descriptive statistics about each variable. 
-
-
-```{r descriptives}
-chicken_data <- ChickWeight
-
-mean(chicken_data$weight)
-```
-  
-  
-# For the sake of practice, let's see what our data would look like in a wider format.
+# Step 4: For the sake of practice, let's see what our data would look like in a wider format.
 
 ```{r pivot wide}
 chickens_wide <- ChickWeight |> 
@@ -75,6 +65,40 @@ chickens_wide <- ChickWeight |>
 
 ### In the code above, we did a univariate pivot to make our original dataset wider such that the column for diet (diet 1-4) was split into four columns for each type of diet, and weight was moved to the appropriate diet for each chick and time point. However, this format is harder to interpret and includes many missing variables. Moving forward, we won't use the "chicken_wide" data, and instead we will use the original "ChickWeight."
 
+# Step 5: Let's get some basic descriptive statistics about each variable. 
 
 
-# Step x: Let's make some plots! 
+```{r descriptives}
+chicken_data <- ChickWeight
+
+summary <- summary(chicken_data)
+
+print(summary)
+```
+
+### The table printed above gives us a summary of descriptive statistics for all variables. 
+
+
+# Step 6: Let's get the weight of the chickens for each of the four diets:
+
+```{r chicken diets}
+chicken_diets <- chicken_data |>
+  group_by(Diet)|>
+  summarize(
+    mean = mean(weight),
+    sd = sd(weight),
+    min = min(weight),
+    max = max(weight)
+  )
+
+print(chicken_diets)
+```
+
+### In the code above, I used dplyr's "group_by()" function to say that I want to group the descriptives into each of the four chicken diets. After the data is grouped by diet, I found the mean, sd, min, and max chicken weights for each diet. It looks like diet 1 had the lowest mean weight, whereas diet 3 had the highest mean weight. 
+
+# Step 7: Let's make some plots to better visualize the chickens' weight by diet! 
+
+```{r bar plots}
+
+
+```
