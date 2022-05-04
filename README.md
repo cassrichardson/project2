@@ -10,4 +10,4 @@ Hello! This is the repository for my second portfolio piece, "Data Analysis Repo
 
 ## *Folders*
 ### Data: This folder is where the data for the project is stored: "Boulder_Safety_and_Stars.csv"
-### Analysis: This folder is for the code for cleaning, filtering, and analyzing the data. 
+### Cleaning & Analysis: This folder is for the code for cleaning, filtering, and analyzing the data. 
