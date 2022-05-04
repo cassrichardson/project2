@@ -30,8 +30,8 @@ data()
 # Step 2: Before we begin any analyses, let's examine what this dataset includes:
 
 ```{r exploring chickens}
-View(ChickWeight)
-?ChickWeight
+#View(ChickWeight)
+#?ChickWeight
 ```
 
 ### The "view()" function opens the full dataset file in a new tab, so we can visually examine what the data looks like. The ?ChickenWeight function opens a help file that explains what this built-in dataset covers. 
@@ -61,6 +61,8 @@ chickens_wide <- ChickWeight |>
   pivot_wider(id_cols = c(Time, Chick), 
               names_from = Diet, 
               values_from = weight)
+
+head(chickens_wide)
 ```
 
 ### In the code above, we did a univariate pivot to make our original dataset wider such that the column for diet (diet 1-4) was split into four columns for each type of diet, and weight was moved to the appropriate diet for each chick and time point. However, this format is harder to interpret and includes many missing variables. Moving forward, we won't use the "chicken_wide" data, and instead we will use the original "ChickWeight."
@@ -107,4 +109,45 @@ ggplot(chicken_data) +
 ### Now we have a very simple bar graph to represent the mean weight of the chickens at each of the 4 diets! This basic graph uses the ggplot2 package with Diet on the x axis and weight on the y axis. I added (stat = "summary", fun = "mean") to tell R that I don't want the values to be the total count of weights for each diet, but rather the mean weight of each diet. Although this graph gets the job done, let's make this graph look a little better:
 
 # Step 8: Making a better bar graph:
+
+```{r better bar graph}
+ggplot(chicken_data) +
+  aes(x = Diet, y = weight, color = Diet, fill = Diet) +
+  geom_bar(stat = "summary", fun = "mean") +
+  labs(
+    title = "Chick Weight by Diet",
+    tag = "Figure 1",
+    x = "Diet",
+    y = "Weight"
+)
+```
+
+# Step 9: Conduct a one-way Analysis of Variance (ANOVA) test to see if the is a statistically significant difference between the avergae weights of the chicken in the four diet groups. 
+
+```{r anova}
+anova <- aov(weight ~ Diet, data = chicken_data)
+
+anova_output <- summary(anova)
+
+print(anova_output)
+```
+
+### A one-way ANOVA with type of diet (1, 2, 3, 4) as the between-subjects factor. There was sufficient evidence to conclude that type of diet had an effect on the weight of the chickens, *F* (3, 574) = 10.81, *p* < .001. 
+
+# Step 10: Since there are more than two levels of the IV (Diet), we need to run post-hoc tests to see which diets are significantly different from each other. 
+
+```{r post hoc}
+TukeyHSD(anova)
+```
+
+### Post hoc tests using a Tukey's HSD adjustment indicated that chickens weighed significantly more on diet 3 (*M* = 143, *SD* = 86.5) than on diet 2 (*M* = 123, *SD* = 71.6) or diet 1 (*M* = 103, *SD* = 56.7). 
+
+# *Final Step: Present the findings:*
+
+## A one-way ANOVA with type of diet (1, 2, 3, 4) as the between-subjects factor. There was sufficient evidence to conclude that type of diet had an effect on the weight of the chickens, *F* (3, 574) = 10.81, *p* < .001.Post hoc tests using a Tukey's HSD adjustment indicated that chickens weighed significantly more on diet 3 (*M* = 143, *SD* = 86.5) than on diet 2 (*M* = 123, *SD* = 71.6) or diet 1 (*M* = 103, *SD* = 56.7). These results are displayed in Figure 1. 
+
+## This data came from "ChickWeight" as one of R's built-in datasets available for public use. Unfortunately, the description of the dataset did not include what each diet consisted of, so we cannot make any inferences about the application of our findings. 
+
+
+
 
