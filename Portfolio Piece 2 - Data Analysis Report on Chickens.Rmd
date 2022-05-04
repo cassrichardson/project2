@@ -8,146 +8,126 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+climbing <- read.csv(here::here("C:/Users/cassr/GitHub/project01/Boulder_Safety_and_Stars.csv"))
+
 library(ggplot2)
 library(dplyr)
 library(tidyverse)
 ```
 
-# **Cassandra Richardson's Portfolio Piece #2 - Data Analysis Report on Chicken Weight and Diet**
+# **Cassandra Richardson's Portfolio Piece #2 - Data Analysis Report on Boulder Safety and Stars**
 
 
 
 # Step 1: Finding a dataset.
 
-### R has several built-in datasets that we can use to practice R functions with. To view these datasets, simply use the function below: 
+### An organization, Open Beta, provides open-source datasets about rock climbing on GitHub. I am using their "Boulder_Safety_and_stars dataset, which can be found here: https://github.com/OpenBeta/climbing-data/tree/main/curated_datasets
 
-```{r finding dataset}
-data()
-```
+### The description of this dataset is: "Boulder_Safety_and_Stars.csv contains the star ratings and safety grades of 24,278 boulder problems collected by Ryther Anderson using the Mountain Project API. Note that this set is not comprehensive (does not cover all states). However, it can be used to augment to existing OpenBeta database in some cases."
 
-### After looking at the built-in datasets, I've decided that I want to use "ChickenWeight."
+### For this data analysis project, I will be exploring the relationships between how much people liked a boulder route (1-5 stars) and the rating of the route (V0-V9+)
 
 # Step 2: Before we begin any analyses, let's examine what this dataset includes:
 
-```{r exploring chickens}
-#View(ChickWeight)
-#?ChickWeight
+```{r exploring climbing}
+#View(climbing)
+
+summary(climbing)
+min(climbing$Vermin)
+max(climbing$Vermin)
+min(climbing$stars)
+max(climbing$stars)
 ```
 
-### The "view()" function opens the full dataset file in a new tab, so we can visually examine what the data looks like. The ?ChickenWeight function opens a help file that explains what this built-in dataset covers. 
+### The "view()" function opens the full dataset file in a new tab, so we can visually examine what the data looks like. 
 
-### The help window tells us that "ChickenWeight" examines the weight versus age of chicken on different diets. This dataset contains 578 rows and 4 columns based on an experiment on the effect of diet on early growth of chicks. 
+### The "summary()" function gives us the min, max, 1st quartile, mean, and 3rd quartile for all quantitative variables. 
 
-# Step 3: Let's explore some characteristics about the data:
+### I used the min() and max() functions to see the range of possible values for route rating ("Vermin") and star rating ("stars")
+
+# Step 3: Let's explore some more characteristics about the data:
 
 ```{r data characteristics}
-glimpse(ChickWeight)
-head(ChickWeight)
-names(ChickWeight)
-missing <- !complete.cases(ChickWeight)
-ChickWeight[missing]
+glimpse(climbing)
+head(climbing)
+names(climbing)
+missing <- !complete.cases(climbing)
+climbing[missing]
 ```
 
-### - glimpse() shows us an overview of the whole dataset. We see that there are 578 rows and 4 columns, just like the help window told us.
+### - glimpse() shows us an overview of the whole dataset. We see that there are 24,278 rows and 8 columns, just like the help window told us.
 ### - head() gives us the first 6 rows of data
-### - names() tells us all of the variable names: "weight" "Time" "Chick" "Diet"  
+### - names() tells us all of the variable names: "X" "ID" "type" "name" "Vermin" "stars"  "votes"  "safety"
 ### - missing <- !complete.cases() creates an object/tibble called "missing" with any missing observations across the entire dataset
-### - ChickWeight[missing] shows us that the "missing" tibble has 0 columns. This means that there was no missing data in this dataset, which makes it easier to work with! 
+### - climbing[missing] shows us that the "missing" tibble has 0 columns. This means that there was no missing data in this dataset, which makes it easier to work with! 
 
-# Step 4: For the sake of practice, let's see what our data would look like in a wider format.
+# Step 4: Before we begin our analyses, I want to clean this data by removing some unnnecessary rows. 
 
-```{r pivot wide}
-chickens_wide <- ChickWeight |> 
-  pivot_wider(id_cols = c(Time, Chick), 
-              names_from = Diet, 
-              values_from = weight)
+### The data is already in a tidy format and has no missing values. Now, I want to analyze the correlation between route difficulty and star ratings. However, the star ratings were based on votes, and the amount of votes per route range from 1 to 612. To ensure that the star rating is more reliable, I will only be using routes that have at least 50 votes. 
 
-head(chickens_wide)
+```{r votes}
+climbing2 <- subset(climbing, votes >= 50)
 ```
 
-### In the code above, we did a univariate pivot to make our original dataset wider such that the column for diet (diet 1-4) was split into four columns for each type of diet, and weight was moved to the appropriate diet for each chick and time point. However, this format is harder to interpret and includes many missing variables. Moving forward, we won't use the "chicken_wide" data, and instead we will use the original "ChickWeight."
+### With the subset() function, I created a new dataset "climbing2" that only includes rows where votes were greater than or equal to 50. This brought our sample size from N = 24, 278 to N = 807.
 
-# Step 5: Let's get some basic descriptive statistics about each variable. 
+# Step 5: Recoding the boulder rating:
 
+### The current boulder route rating is found in the "Vermin" column and it uses the V scale. Some ratings have a range (i.e., V1-2). For those with a range, we will only use the lower number. Some ratings have a + or - score. Those will be dropped. Further, there are two ratings that are outliers as they are in the professional range, "V10-" and "V14-"; these values will be recoded to "NA". 
 
-```{r descriptives}
-chicken_data <- ChickWeight
+```{r recoding}
+factor(climbing2$Vermin)
 
-summary <- summary(chicken_data)
+climbing_recoded <- climbing2 |>
+  mutate(
+    Vermin = recode(Vermin, "V0-" = "V0", "V0+" = "V0", "V0-1" = "V0", "V1-" = "V1", "V1+" = "V1", "V1-2" = "V1", "V2-" = "V2", "V2+" = "V2", "V2-3" = "V2", "V3-" = "V3", "V3+" = "V3", "V3-4" = "V3", "V4-" = "V4", "V4+" = "V4", "V4-5" = "V4", "V5-" = "V5", "V5-6" = "V5", "V5+" = "V5", "V6-"= "V6", "V6-7" = "V6", "V6+" = "V6", "V7-" = "V7", "V7+" = "V7", "V8-" = "V8", "V9-" = "V9", "V10-" = "NA", "V14-" = "NA"
+  ))
 
-print(summary)
+factor(climbing_recoded$Vermin)
 ```
 
-### The table printed above gives us a summary of descriptive statistics for all variables. 
+# Step 6: Find the mean star rating for each boulder rating. 
 
-
-# Step 6: Let's get the weight of the chickens for each of the four diets:
-
-```{r chicken diets}
-chicken_diets <- chicken_data |>
-  group_by(Diet)|>
+```{r mean rating}
+climbing_stars <- climbing_recoded |>
+  group_by(Vermin)|>
   summarize(
-    mean = mean(weight),
-    sd = sd(weight),
-    min = min(weight),
-    max = max(weight)
+    mean = mean(stars),
+    sd = sd(stars),
+    min = min(stars),
+    max = max(stars)
   )
 
-print(chicken_diets)
+print(climbing_stars)
 ```
 
-### In the code above, I used dplyr's "group_by()" function to say that I want to group the descriptives into each of the four chicken diets. After the data is grouped by diet, I found the mean, sd, min, and max chicken weights for each diet. It looks like diet 1 had the lowest mean weight, whereas diet 3 had the highest mean weight. 
-
-# Step 7: Let's make a bar graph to better visualize the chickens' weight by diet! 
+# Step 6: Let's visualize our data using a bar graph. 
 
 ```{r bar graph}
-ggplot(chicken_data) +
-  aes(x = Diet, y = weight) +
-  geom_bar(stat = "summary", fun = "mean")
-```
-
-### Now we have a very simple bar graph to represent the mean weight of the chickens at each of the 4 diets! This basic graph uses the ggplot2 package with Diet on the x axis and weight on the y axis. I added (stat = "summary", fun = "mean") to tell R that I don't want the values to be the total count of weights for each diet, but rather the mean weight of each diet. Although this graph gets the job done, let's make this graph look a little better:
-
-# Step 8: Making a better bar graph:
-
-```{r better bar graph}
-ggplot(chicken_data) +
-  aes(x = Diet, y = weight, color = Diet, fill = Diet) +
+climbing_recoded |>
+  filter(climbing_recoded$Vermin != "NA") |>
+ggplot(mapping = aes(x = Vermin, y = stars, color = Vermin, fill = Vermin)) +
   geom_bar(stat = "summary", fun = "mean") +
   labs(
-    title = "Chick Weight by Diet",
+    title = "Star Rating by Route Difficulty",
     tag = "Figure 1",
-    x = "Diet",
-    y = "Weight"
-)
+    x = "Route Difficulty Rating (V0 = beginner, V9 = Expert)",
+    y = "Star Rating (1-5 stars)")
 ```
 
-# Step 9: Conduct a one-way Analysis of Variance (ANOVA) test to see if the is a statistically significant difference between the avergae weights of the chicken in the four diet groups. 
+# Step 7: Now let's visualize our data using a scatterplot.
 
-```{r anova}
-anova <- aov(weight ~ Diet, data = chicken_data)
-
-anova_output <- summary(anova)
-
-print(anova_output)
+```{r scatterplot}
+climbing_recoded |>
+  filter(climbing_recoded$Vermin != "NA") |>
+ggplot(mapping = aes(x = Vermin, y = stars, color = Vermin)) +
+  geom_jitter(height = .5, width = .5) +
+  labs(
+    title = "Star Rating by Route Difficulty",
+    tag = "Figure 1",
+    x = "Route Difficulty Rating",
+    caption = "(V0 = beginner, V9 = Expert)",
+    y = "Star Rating (1-5 stars)")
 ```
-
-### A one-way ANOVA with type of diet (1, 2, 3, 4) as the between-subjects factor. There was sufficient evidence to conclude that type of diet had an effect on the weight of the chickens, *F* (3, 574) = 10.81, *p* < .001. 
-
-# Step 10: Since there are more than two levels of the IV (Diet), we need to run post-hoc tests to see which diets are significantly different from each other. 
-
-```{r post hoc}
-TukeyHSD(anova)
-```
-
-### Post hoc tests using a Tukey's HSD adjustment indicated that chickens weighed significantly more on diet 3 (*M* = 143, *SD* = 86.5) than on diet 2 (*M* = 123, *SD* = 71.6) or diet 1 (*M* = 103, *SD* = 56.7). 
-
-# *Final Step: Present the findings:*
-
-## A one-way ANOVA with type of diet (1, 2, 3, 4) as the between-subjects factor. There was sufficient evidence to conclude that type of diet had an effect on the weight of the chickens, *F* (3, 574) = 10.81, *p* < .001.Post hoc tests using a Tukey's HSD adjustment indicated that chickens weighed significantly more on diet 3 (*M* = 143, *SD* = 86.5) than on diet 2 (*M* = 123, *SD* = 71.6) or diet 1 (*M* = 103, *SD* = 56.7). These results are displayed in Figure 1. 
-
-## This data came from "ChickWeight" as one of R's built-in datasets available for public use. Unfortunately, the description of the dataset did not include what each diet consisted of, so we cannot make any inferences about the application of our findings. 
-
-
 
 
