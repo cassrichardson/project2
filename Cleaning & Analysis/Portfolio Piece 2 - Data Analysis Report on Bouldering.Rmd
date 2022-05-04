@@ -8,7 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-climbing <- read.csv(here::here("C:/Users/cassr/GitHub/project01/Boulder_Safety_and_Stars.csv"))
+climbing <- read.csv(here::here("C:/Users/cassr/GitHub/project2/data/Boulder_Safety_and_Stars.csv"))
 
 library(ggplot2)
 library(dplyr)
