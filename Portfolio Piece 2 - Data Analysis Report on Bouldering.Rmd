@@ -136,12 +136,20 @@ ggplot(mapping = aes(x = Vermin, y = stars, color = Vermin)) +
     y = "Star Rating (1-5 stars)")
 ```
 
+# Step 9: Let's perform the Chi-square test of independence to see if there is a relationship between star rating and route difficulty:
+
 ```{r correlation}
 chi_square <- chisq.test(climbing_recoded$stars, climbing_recoded$Vermin)
 
 chi_square
 ```
-# Step 9: Let's conduct a one-way Analysis of Variance (ANOVA) test to see if the is a statistically significant difference in the average star rating between the different difficulties of routes.  
+
+### Our Chi-square test was signficant at *p* < .001! *X^2* = 538.41. I would interpret this to mean that there is a correlation between star rating and route difficulty, such that higher levels of difficulty are associated with higher star ratings. 
+
+#### *Note for Dr. Wiernik: For this correlation test, I chose to use the Chi-square test because route difficulty ("Vermin") is a categorical variable. Although I am not sure if this is the correct test, I wanted to gain practice in running correlations in R.*
+
+
+# Step 10: Let's conduct a one-way Analysis of Variance (ANOVA) test to see if the is a statistically significant difference in the average star rating between the different difficulties of routes.  
 
 ```{r anova}
 anova <- aov(stars ~ Vermin, data = climbing_recoded)
@@ -153,8 +161,10 @@ print(anova_output)
 
 ### I conducted a one-way ANOVA with route difficultly (NA, V0, V1, V2, V3, V4, V5, V6, V7, V8, V9) as the between-subjects factor. There was sufficient evidence to conclude that route difficulty had an effect on the star rating of the route, *F* (10, 796) = 33.64, *p* < .001. 
 
+#### *Note for Dr. Wiernik: The dataset does not clarify how the scores were measured, so I am not sure if this is between-subjects or within-subjects. For the sake of practice, I chose to interpret the data as between-subjects.*
 
-# Step 10: Since there are more than two levels of the IV (route difficulty), we need to run post-hoc tests to see which diets are significantly different from each other. 
+
+# Step 11: Since there are more than two levels of the IV (route difficulty), we need to run post-hoc tests to see which diets are significantly different from each other. 
 
 ```{r post hoc}
 TukeyHSD(anova)
@@ -162,5 +172,13 @@ TukeyHSD(anova)
 
 ### Post hoc tests using a Tukey's HSD adjustment indicated that V0 routes (beginner routes) (*M* = 3.52, *SD* = 0.53) had signficantly lower star ratings than almost all other routes: V2 (*M* = 3.80, *SD* = 0.50), V3 (*M* = 3.97, *SD* = 0.43), V4 (*M* = 4.21, *SD* = 0.46), V5 (*M* = 4.15, *SD* = 0.47), V6 (*M* = 4.32, *SD* = 0.42), V7 (*M* = 4.33, *SD* = 0.39), V8 (*M* = 4.54, *SD* = 0.43), and V9 (*M* = 4.85, *SD* = 0.21). There was no signficant difference in route star rating between V0 and V1 (*M* = 3.55, *SD* = 0.51). V1 routes had signficantly lower star ratings than V2, V3, V4, V5, V6, V7, V8, and V9. V2 routes had signficantly lower star ratings than V4-V8. V3 routes had signficantly lower star ratings than V4, V6, V7, and V8. All other comparions were not signficantly different. 
 
+
+# **Interpretation of the Findings**
+
+### Based on our analyses, there is a signficant relationship between boulder route difficulty and star rating such that more difficult routes have higher star ratings. This relationship is especially prevalent among the beginner-intermediate routes (V0, V1, V2, and V3), with less differences in star ratings at the most difficult levels of routes. 
+
+### Unfortunately, information about the data is limited, preventing the ability to make clearer interpretations.Primarily, the method of data collection and information about the measures was vague. I am assuming that star rating reflects how much people enjoyed the route for the sake of analyses. 
+
+### If my understanding of the data is correct, then we can infer that people tend to enjoy more difficult routes. Future studies can examine if this relationship still exists when controlling for skill level (i.e., do people still enjoy advanced routes if they are a beginner?). Future studies can also examine what aspects of the route people enjoyed (i.e., location, rock type, hold type, etc.) to aid in developing more enjoyable indoor climbing routes. 
 
 
