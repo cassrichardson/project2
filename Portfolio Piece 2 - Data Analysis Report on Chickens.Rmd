@@ -21,11 +21,12 @@ library(tidyverse)
 
 # Step 1: Finding a dataset.
 
-### An organization, Open Beta, provides open-source datasets about rock climbing on GitHub. I am using their "Boulder_Safety_and_stars dataset, which can be found here: https://github.com/OpenBeta/climbing-data/tree/main/curated_datasets
+### An organization, Open Beta, provides open-source datasets about rock climbing on GitHub. I am using their "Boulder_Safety_and_stars" dataset, which can be found here: https://github.com/OpenBeta/climbing-data/tree/main/curated_datasets
 
 ### The description of this dataset is: "Boulder_Safety_and_Stars.csv contains the star ratings and safety grades of 24,278 boulder problems collected by Ryther Anderson using the Mountain Project API. Note that this set is not comprehensive (does not cover all states). However, it can be used to augment to existing OpenBeta database in some cases."
 
 ### For this data analysis project, I will be exploring the relationships between how much people liked a boulder route (1-5 stars) and the rating of the route (V0-V9+)
+
 
 # Step 2: Before we begin any analyses, let's examine what this dataset includes:
 
@@ -44,6 +45,7 @@ max(climbing$stars)
 ### The "summary()" function gives us the min, max, 1st quartile, mean, and 3rd quartile for all quantitative variables. 
 
 ### I used the min() and max() functions to see the range of possible values for route rating ("Vermin") and star rating ("stars")
+
 
 # Step 3: Let's explore some more characteristics about the data:
 
@@ -71,6 +73,7 @@ climbing2 <- subset(climbing, votes >= 50)
 
 ### With the subset() function, I created a new dataset "climbing2" that only includes rows where votes were greater than or equal to 50. This brought our sample size from N = 24, 278 to N = 807.
 
+
 # Step 5: Recoding the boulder rating:
 
 ### The current boulder route rating is found in the "Vermin" column and it uses the V scale. Some ratings have a range (i.e., V1-2). For those with a range, we will only use the lower number. Some ratings have a + or - score. Those will be dropped. Further, there are two ratings that are outliers as they are in the professional range, "V10-" and "V14-"; these values will be recoded to "NA". 
@@ -85,6 +88,7 @@ climbing_recoded <- climbing2 |>
 
 factor(climbing_recoded$Vermin)
 ```
+
 
 # Step 6: Find the mean star rating for each boulder rating. 
 
@@ -101,7 +105,8 @@ climbing_stars <- climbing_recoded |>
 print(climbing_stars)
 ```
 
-# Step 6: Let's visualize our data using a bar graph. 
+
+# Step 7: Let's visualize our data using a bar graph. 
 
 ```{r bar graph}
 climbing_recoded |>
@@ -115,7 +120,8 @@ ggplot(mapping = aes(x = Vermin, y = stars, color = Vermin, fill = Vermin)) +
     y = "Star Rating (1-5 stars)")
 ```
 
-# Step 7: Now let's visualize our data using a scatterplot.
+
+# Step 8: Now let's visualize our data using a scatterplot.
 
 ```{r scatterplot}
 climbing_recoded |>
@@ -129,5 +135,32 @@ ggplot(mapping = aes(x = Vermin, y = stars, color = Vermin)) +
     caption = "(V0 = beginner, V9 = Expert)",
     y = "Star Rating (1-5 stars)")
 ```
+
+```{r correlation}
+chi_square <- chisq.test(climbing_recoded$stars, climbing_recoded$Vermin)
+
+chi_square
+```
+# Step 9: Let's conduct a one-way Analysis of Variance (ANOVA) test to see if the is a statistically significant difference in the average star rating between the different difficulties of routes.  
+
+```{r anova}
+anova <- aov(stars ~ Vermin, data = climbing_recoded)
+
+anova_output <- summary(anova)
+
+print(anova_output)
+```
+
+### I conducted a one-way ANOVA with route difficultly (NA, V0, V1, V2, V3, V4, V5, V6, V7, V8, V9) as the between-subjects factor. There was sufficient evidence to conclude that route difficulty had an effect on the star rating of the route, *F* (10, 796) = 33.64, *p* < .001. 
+
+
+# Step 10: Since there are more than two levels of the IV (route difficulty), we need to run post-hoc tests to see which diets are significantly different from each other. 
+
+```{r post hoc}
+TukeyHSD(anova)
+```
+
+### Post hoc tests using a Tukey's HSD adjustment indicated that V0 routes (beginner routes) (*M* = 3.52, *SD* = 0.53) had signficantly lower star ratings than almost all other routes: V2 (*M* = 3.80, *SD* = 0.50), V3 (*M* = 3.97, *SD* = 0.43), V4 (*M* = 4.21, *SD* = 0.46), V5 (*M* = 4.15, *SD* = 0.47), V6 (*M* = 4.32, *SD* = 0.42), V7 (*M* = 4.33, *SD* = 0.39), V8 (*M* = 4.54, *SD* = 0.43), and V9 (*M* = 4.85, *SD* = 0.21). There was no signficant difference in route star rating between V0 and V1 (*M* = 3.55, *SD* = 0.51). V1 routes had signficantly lower star ratings than V2, V3, V4, V5, V6, V7, V8, and V9. V2 routes had signficantly lower star ratings than V4-V8. V3 routes had signficantly lower star ratings than V4, V6, V7, and V8. All other comparions were not signficantly different. 
+
 
 
